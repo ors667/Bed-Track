@@ -57,3 +57,17 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   maximum_batching_window_in_seconds = 5
   function_response_types            = ["ReportBatchItemFailures"]
 }
+
+resource "aws_lambda_function" "isolated_processor" {
+  function_name = "isolated_processor"
+  role          = aws_iam_role.bedtrack_lambda.arn
+  handler       = "index.handler"
+  runtime       = "python3.9"
+  filename      = "payload.zip"
+  kms_key_arn   = aws_kms_key.phi_cmk.arn
+
+  vpc_config {
+    subnet_ids         = []
+    security_group_ids = []
+  }
+}
