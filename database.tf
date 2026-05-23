@@ -8,7 +8,7 @@
 
 resource "aws_dynamodb_table" "bed_status" {
   name         = "bedtrack-bed-status"
-  billing_mode = "PAY_PER_REQUEST"  # Auto-scales; data replicated across 3 AZs
+  billing_mode = "PAY_PER_REQUEST" # Auto-scales; data replicated across 3 AZs
   hash_key     = "bed_id"
   range_key    = "updated_at"
 
@@ -54,4 +54,25 @@ resource "aws_dynamodb_table" "bed_status" {
   }
 
   deletion_protection_enabled = true
+}
+
+resource "aws_security_group" "lambda_isolation_sg" {
+  name        = "lambda_isolation_sg"
+  description = "Security group for Lambda functions requiring strict network isolation"
+
+  ingress {
+    description = "Allow internal security group communication"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self        = true
+  }
+
+  egress {
+    description = "Allow internal security group communication only"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self        = true
+  }
 }
