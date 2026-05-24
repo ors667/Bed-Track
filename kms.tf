@@ -63,6 +63,12 @@ resource "aws_kms_key" "phi_cmk" {
       }
     ]
   })
+  tags = {
+    app                = "bedtrack"
+    env                = "production"
+    "data-sensitivity" = "phi"
+    "hipaa-scope"      = "true"
+  }
 }
 
 resource "aws_kms_alias" "phi_cmk" {
