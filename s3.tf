@@ -8,6 +8,12 @@
 resource "aws_s3_bucket" "audit_logs" {
   bucket        = "${var.account_id}-bedtrack-audit-logs"
   force_destroy = false
+  tags = {
+    app              = "bedtrack"
+    env              = "production"
+    data-sensitivity = "phi"
+    hipaa-scope      = "true"
+  }
 }
 
 resource "aws_s3_bucket_versioning" "audit_logs" {
@@ -55,7 +61,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "audit_logs" {
     }
 
     expiration {
-      days = 2190  # 6 years — HIPAA minimum for operational records
+      days = 2190 # 6 years — HIPAA minimum for operational records
     }
   }
 }

@@ -8,7 +8,7 @@
 
 resource "aws_dynamodb_table" "bed_status" {
   name         = "bedtrack-bed-status"
-  billing_mode = "PAY_PER_REQUEST"  # Auto-scales; data replicated across 3 AZs
+  billing_mode = "PAY_PER_REQUEST" # Auto-scales; data replicated across 3 AZs
   hash_key     = "bed_id"
   range_key    = "updated_at"
 
@@ -54,4 +54,75 @@ resource "aws_dynamodb_table" "bed_status" {
   }
 
   deletion_protection_enabled = true
+  tags = {
+    app                = "bedtrack"
+    env                = "production"
+    "data-sensitivity" = "phi"
+    "hipaa-scope"      = "true"
+  }
+}
+
+resource "aws_sns_topic_policy" "bed_alerts" {
+  arn = aws_sns_topic.bed_alerts.arn
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "EnforceSecureTransport"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "sns:Publish"
+        Resource  = aws_sns_topic.bed_alerts.arn
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      }
+    ]
+  })
+}
+resource "aws_s3_bucket_policy" "audit_logs" {
+  bucket = aws_s3_bucket.audit_logs.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "EnforceSecureTransport"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          aws_s3_bucket.audit_logs.arn,
+          "${aws_s3_bucket.audit_logs.arn}/*"
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      }
+    ]
+  })
+}
+resource "aws_sqs_queue_policy" "bed_events" {
+  queue_url = aws_sqs_queue.bed_events.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "EnforceSecureTransport"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "sqs:*"
+        Resource  = aws_sqs_queue.bed_events.arn
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      }
+    ]
+  })
 }

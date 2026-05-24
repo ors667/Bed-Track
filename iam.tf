@@ -19,6 +19,12 @@ resource "aws_iam_role" "bedtrack_lambda" {
   name               = "bedtrack-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
   description        = "Least-privilege execution role for BedTrack Lambda"
+  tags = {
+    app              = "bedtrack"
+    env              = "production"
+    data-sensitivity = "phi"
+    hipaa-scope      = "true"
+  }
 }
 
 resource "aws_iam_role_policy" "bedtrack_lambda" {
@@ -84,7 +90,7 @@ resource "aws_iam_role_policy" "bedtrack_lambda" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = "arn:aws:logs:${var.region}:${var.account_id}:log-group:/aws/lambda/bedtrack-processor:*"
+        Resource = "arn:aws:logs:us-west-2:${var.account_id}:log-group:/aws/lambda/bedtrack-processor:*"
       },
       {
         Sid    = "VPCNetworking"

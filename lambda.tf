@@ -18,7 +18,7 @@ resource "aws_lambda_function" "bedtrack_processor" {
   handler       = "handler.process_bed_event"
   runtime       = "python3.12"
   filename      = "bedtrack_processor.zip"
-  timeout       = 60   # Must be less than SQS visibility timeout (90s)
+  timeout       = 60 # Must be less than SQS visibility timeout (90s)
   memory_size   = 256
   kms_key_arn   = aws_kms_key.phi_cmk.arn
 
@@ -41,13 +41,19 @@ resource "aws_lambda_function" "bedtrack_processor" {
   # SQS trigger — batch size of 10 with report_batch_item_failures
   # allows partial batch success; failed messages retry individually
   # rather than reprocessing the entire batch
-  event_source_mapping_config = null  # Defined via aws_lambda_event_source_mapping below
+  event_source_mapping_config = null # Defined via aws_lambda_event_source_mapping below
 
   tracing_config {
-    mode = "Active"  # X-Ray tracing for end-to-end request visibility
+    mode = "Active" # X-Ray tracing for end-to-end request visibility
   }
 
   depends_on = [aws_iam_role_policy.bedtrack_lambda]
+  tags = {
+    app              = "bedtrack"
+    env              = "production"
+    data-sensitivity = "phi"
+    hipaa-scope      = "true"
+  }
 }
 
 resource "aws_lambda_event_source_mapping" "sqs_trigger" {
@@ -56,18 +62,33 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   batch_size                         = 10
   maximum_batching_window_in_seconds = 5
   function_response_types            = ["ReportBatchItemFailures"]
+  tags = {
+    app              = "bedtrack"
+    env              = "production"
+    data-sensitivity = "phi"
+    hipaa-scope      = "true"
+  }
 }
 
 resource "aws_lambda_function" "isolated_processor" {
   function_name = "isolated_processor"
   role          = aws_iam_role.bedtrack_lambda.arn
   handler       = "index.handler"
-  runtime       = "python3.9"
+  runtime       = "python3.12"
   filename      = "payload.zip"
   kms_key_arn   = aws_kms_key.phi_cmk.arn
 
   vpc_config {
-    subnet_ids         = []
-    security_group_ids = []
+    subnet_ids         = var.subnet_ids
+    security_group_ids = [var.lambda_sg_id]
+  }
+  tracing_config = {
+    mode = "Active"
+  }
+  tags = {
+    app              = "bedtrack"
+    env              = "production"
+    data-sensitivity = "phi"
+    hipaa-scope      = "true"
   }
 }
