@@ -70,4 +70,10 @@ resource "aws_lambda_function" "isolated_processor" {
     subnet_ids         = []
     security_group_ids = []
   }
+  tags = {
+    app                = "bedtrack"
+    env                = "production"
+    "data-sensitivity" = "phi"
+    "hipaa-scope"      = "true"
+  }
 }

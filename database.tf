@@ -54,4 +54,10 @@ resource "aws_dynamodb_table" "bed_status" {
   }
 
   deletion_protection_enabled = true
+  tags = {
+    app              = "bedtrack"
+    env              = "production"
+    data-sensitivity = "phi"
+    hipaa-scope      = "true"
+  }
 }
