@@ -8,6 +8,12 @@
 resource "aws_s3_bucket" "audit_logs" {
   bucket        = "${var.account_id}-bedtrack-audit-logs"
   force_destroy = false
+  tags = {
+    app              = "bedtrack"
+    data-sensitivity = "phi"
+    env              = "production"
+    hipaa-scope      = "true"
+  }
 }
 
 resource "aws_s3_bucket_versioning" "audit_logs" {

@@ -48,6 +48,12 @@ resource "aws_lambda_function" "bedtrack_processor" {
   }
 
   depends_on = [aws_iam_role_policy.bedtrack_lambda]
+  tags = {
+    "app"              = "bedtrack"
+    "data-sensitivity" = "phi"
+    "env"              = "production"
+    "hipaa-scope"      = "true"
+  }
 }
 
 resource "aws_lambda_event_source_mapping" "sqs_trigger" {
@@ -62,12 +68,21 @@ resource "aws_lambda_function" "isolated_processor" {
   function_name = "isolated_processor"
   role          = aws_iam_role.bedtrack_lambda.arn
   handler       = "index.handler"
-  runtime       = "python3.9"
+  runtime       = "python3.12"
   filename      = "payload.zip"
   kms_key_arn   = aws_kms_key.phi_cmk.arn
 
   vpc_config {
-    subnet_ids         = []
+    subnet_ids         = var.subnet_ids
     security_group_ids = []
+  }
+  tracing_config {
+    mode = "Active"
+}
+  tags = {
+    app              = "bedtrack"
+    data-sensitivity = "phi"
+    env              = "production"
+    hipaa-scope      = "true"
   }
 }

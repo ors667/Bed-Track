@@ -12,6 +12,12 @@ resource "aws_sqs_queue" "bed_events_dlq" {
   message_retention_seconds  = 604800  # 7 days
   kms_master_key_id          = aws_kms_key.phi_cmk.arn
   kms_data_key_reuse_period_seconds = 300
+  tags = {
+    app              = "bedtrack"
+    data-sensitivity = "phi"
+    env              = "production"
+    hipaa-scope      = "true"
+  }
 }
 
 resource "aws_sqs_queue" "bed_events" {
@@ -26,4 +32,10 @@ resource "aws_sqs_queue" "bed_events" {
     deadLetterTargetArn = aws_sqs_queue.bed_events_dlq.arn
     maxReceiveCount     = 3
   })
+  tags = {
+    app                = "bedtrack"
+    "data-sensitivity" = "phi"
+    env                = "production"
+    "hipaa-scope"      = "true"
+  }
 }
