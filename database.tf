@@ -54,4 +54,51 @@ resource "aws_dynamodb_table" "bed_status" {
   }
 
   deletion_protection_enabled = true
+  tags = {
+    app              = "bedtrack"
+    data-sensitivity = "phi"
+    env              = "production"
+    hipaa-scope      = "true"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "dlq_depth_alarm" {
+  alarm_name          = "bedtrack-${var.environment}-dlq-depth"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  metric_name         = "ApproximateNumberOfMessagesVisible"
+  namespace           = "AWS/SQS"
+  period              = 300
+  statistic           = "Maximum"
+  threshold           = 1
+  alarm_description   = "Alert when poison pill messages are moved to the BedTrack DLQ"
+  alarm_actions       = [aws_sns_topic.bed_alerts.arn]
+
+  dimensions = {
+    QueueName = aws_sqs_queue.bed_events_dlq.name
+  }
+}
+resource "aws_s3_bucket_policy" "audit_logs" {
+  bucket = aws_s3_bucket.audit_logs.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "DenyAccessOutsideVPC"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          aws_s3_bucket.audit_logs.arn,
+          "${aws_s3_bucket.audit_logs.arn}/*"
+        ]
+        Condition = {
+          StringNotEquals = {
+            "aws:SourceVpc" = var.vpc_id
+          }
+        }
+      }
+    ]
+  })
 }
