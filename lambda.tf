@@ -67,7 +67,10 @@ resource "aws_lambda_function" "isolated_processor" {
   kms_key_arn   = aws_kms_key.phi_cmk.arn
 
   vpc_config {
-    subnet_ids         = []
-    security_group_ids = []
+    subnet_ids         = var.subnet_ids
+    security_group_ids = [var.lambda_sg_id]
   }
+  tracing_config {
+    mode = "Active"
+}
 }
