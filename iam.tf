@@ -55,7 +55,7 @@ resource "aws_iam_role_policy" "bedtrack_lambda" {
         ]
         Resource = [
           aws_dynamodb_table.bed_status.arn,
-          "${aws_dynamodb_table.bed_status.arn}/index/*"
+          "${aws_dynamodb_table.bed_status.arn}/index/ward-updated-index"
         ]
       },
       {
@@ -90,7 +90,7 @@ resource "aws_iam_role_policy" "bedtrack_lambda" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = "arn:aws:logs:${var.region}:${var.account_id}:log-group:/aws/lambda/bedtrack-processor:*"
+        Resource = "arn:aws:logs:us-west-2:${var.account_id}:log-group:/aws/lambda/bedtrack-processor:*"
       },
       {
         Sid    = "VPCNetworking"

@@ -24,6 +24,6 @@ resource "aws_sqs_queue" "bed_events" {
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.bed_events_dlq.arn
-    maxReceiveCount     = 3
+    maxReceiveCount     = 4
   })
 }
