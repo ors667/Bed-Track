@@ -32,3 +32,5 @@ output "kms_key_arn" {
   description = "PHI CMK ARN used across all BedTrack data stores"
   value       = aws_kms_key.phi_cmk.arn
 }
+
+# KEN-317 e2e: no-op comment — no resource change (validates D2 PR diff)
