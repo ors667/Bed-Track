@@ -27,3 +27,20 @@ resource "aws_sqs_queue" "bed_events" {
     maxReceiveCount     = 4
   })
 }
+
+# KEN-318 E2E: add the missing DLQ access policy enforcing encryption-in-transit
+# (the base flags the DLQ as having no policy — FND-wiy120zhr).
+resource "aws_sqs_queue_policy" "bed_events_dlq" {
+  queue_url = aws_sqs_queue.bed_events_dlq.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid       = "EnforceTLS"
+      Effect    = "Deny"
+      Principal = "*"
+      Action    = "sqs:*"
+      Resource  = aws_sqs_queue.bed_events_dlq.arn
+      Condition = { Bool = { "aws:SecureTransport" = "false" } }
+    }]
+  })
+}
