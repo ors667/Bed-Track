@@ -44,7 +44,7 @@ resource "aws_lambda_function" "bedtrack_processor" {
   event_source_mapping_config = null  # Defined via aws_lambda_event_source_mapping below
 
   tracing_config {
-    mode = "Active"  # X-Ray tracing for end-to-end request visibility
+    mode = "Active" # X-Ray tracing for end-to-end request visibility
   }
 
   depends_on = [aws_iam_role_policy.bedtrack_lambda]
