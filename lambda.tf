@@ -62,7 +62,7 @@ resource "aws_lambda_function" "isolated_processor" {
   function_name = "isolated_processor"
   role          = aws_iam_role.bedtrack_lambda.arn
   handler       = "index.handler"
-  runtime       = "python3.9"
+  runtime       = "python3.12"
   filename      = "payload.zip"
   kms_key_arn   = aws_kms_key.phi_cmk.arn
 
